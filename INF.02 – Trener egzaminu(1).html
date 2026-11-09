@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>INF.02 – Trener egzaminu</title>
+<style>
+:root{--bg:#f3f4fb;--card:#fff;--tx:#1b1d2b;--mut:#6b7090;--ac:#5b5bf0;--ac2:#8b5cf6;--ok:#12a36b;--okb:#e3f7ee;--bad:#e5484d;--badb:#fdeaea;--bd:#e4e6f3;--sh:0 10px 40px rgba(60,60,140,.12);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1020;--card:#191a2e;--tx:#eceefb;--mut:#9a9ec4;--ok:#34d399;--okb:#12352b;--bad:#ff6b70;--badb:#3a1a22;--bd:#2a2c48;--sh:0 10px 40px rgba(0,0,0,.4)}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex;justify-content:center;padding:24px 16px;background-image:radial-gradient(600px 300px at 10% -5%,rgba(91,91,240,.18),transparent),radial-gradient(500px 300px at 100% 0,rgba(139,92,246,.15),transparent);background-attachment:fixed}
+.app{width:100%;max-width:720px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:24px;box-shadow:var(--sh);padding:32px;animation:in .35s ease}
+@keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.badge{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--ac);background:rgba(91,91,240,.12);padding:6px 12px;border-radius:99px}
+h1{font-size:clamp(28px,6vw,40px);line-height:1.1;margin:16px 0 10px;letter-spacing:-.02em}
+h1 span{background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent}
+p.lead{color:var(--mut);line-height:1.6;margin:0 0 24px}
+h3{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin:22px 0 10px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.chip{flex:1;min-width:110px;padding:14px 16px;border-radius:14px;border:2px solid var(--bd);background:transparent;color:var(--tx);font:600 15px inherit;font-family:inherit;cursor:pointer;transition:.15s}
+.chip:hover{border-color:var(--ac)}
+.chip.on{border-color:var(--ac);background:rgba(91,91,240,.12);color:var(--ac)}
+.btn{display:block;width:100%;margin-top:28px;padding:16px;border:0;border-radius:14px;background:linear-gradient(90deg,var(--ac),var(--ac2));color:#fff;font:700 16px inherit;font-family:inherit;cursor:pointer;box-shadow:0 8px 20px rgba(91,91,240,.35);transition:.15s}
+.btn:hover{transform:translateY(-1px)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn.ghost{background:transparent;color:var(--tx);border:2px solid var(--bd);box-shadow:none}
+.top{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--mut);font-weight:600;margin-bottom:12px}
+.bar{height:8px;background:var(--bd);border-radius:9px;overflow:hidden;margin-bottom:26px}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--ac),var(--ac2));border-radius:9px;transition:width .3s}
+.q{font-size:clamp(19px,4vw,23px);line-height:1.4;font-weight:700;margin:8px 0 22px}
+.opt{display:flex;gap:14px;align-items:center;width:100%;text-align:left;padding:15px 16px;margin-bottom:10px;border-radius:14px;border:2px solid var(--bd);background:transparent;color:var(--tx);font:500 16px/1.4 inherit;font-family:inherit;cursor:pointer;transition:.15s}
+.opt:hover:not(:disabled){border-color:var(--ac);transform:translateX(3px)}
+.opt b{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--bd);font-size:13px}
+.opt.ok{border-color:var(--ok);background:var(--okb)}
+.opt.ok b{background:var(--ok);color:#fff}
+.opt.bad{border-color:var(--bad);background:var(--badb)}
+.opt.bad b{background:var(--bad);color:#fff}
+.opt:disabled{cursor:default}
+.ring{width:170px;height:170px;margin:10px auto 6px;border-radius:50%;display:grid;place-items:center;position:relative}
+.ring div{width:134px;height:134px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-size:36px;font-weight:800}
+.res{text-align:center}
+.verdict{font-size:22px;font-weight:800;margin:10px 0 4px}
+.rev{border:1px solid var(--bd);border-radius:14px;padding:14px 16px;margin-top:10px;font-size:15px;line-height:1.5}
+.rev small{display:block;margin-top:6px}
+.rev .w{color:var(--bad)}.rev .g{color:var(--ok)}
+.hint{color:var(--mut);font-size:13px;text-align:center;margin-top:16px}
+</style>
+</head>
+<body>
+<div class="app"><div class="card" id="root"></div></div>
+<script>
+// [kategoria, pytanie, poprawna, błędne1, błędne2, błędne3]
+const Q=[
+["Sprzęt","Które gniazdo na płycie głównej służy do montażu karty graficznej?","PCI Express x16","SATA","DIMM","Socket LGA"],
+["Sprzęt","Moduł pamięci DDR4 zamontowany w gnieździe DDR5:","nie pasuje – gniazda mają inne wcięcia","będzie działał z mniejszą częstotliwością","będzie działał po zmianie w BIOS","będzie działał tylko w trybie Dual Channel"],
+["Sprzęt","Macierz RAID 1 to:","lustrzane odbicie dysków (mirroring)","striping bez nadmiarowości","striping z parzystością","połączenie dysków w jeden wolumin JBOD"],
+["Sprzęt","Minimalna liczba dysków potrzebna do macierzy RAID 5 to:","3","2","4","5"],
+["Sprzęt","Do czego służy pasta termoprzewodząca?","poprawia odprowadzanie ciepła z procesora do radiatora","izoluje procesor elektrycznie","mocuje radiator do procesora","chroni procesor przed kurzem"],
+["Sprzęt","Jakiego interfejsu używają dyski SSD NVMe?","PCI Express","PATA","SCSI","FireWire"],
+["Sprzęt","Do którego elementu podłącza się 24-pinowe złącze zasilacza ATX?","płyta główna","karta graficzna","napęd optyczny","dysk twardy"],
+["Sprzęt","Które napięcia dostarcza zasilacz komputerowy ATX?","+3,3 V, +5 V, +12 V","+1,5 V, +3 V, +9 V","+5 V, +9 V, +24 V","+2,5 V, +7 V, +15 V"],
+["Sprzęt","Co robi procedura POST?","testuje podstawowe podzespoły po włączeniu komputera","instaluje system operacyjny","formatuje dysk twardy","aktualizuje sterowniki"],
+["Sprzęt","Który element drukarki laserowej jest światłoczuły?","bęben","głowica","fuser (utrwalacz)","rolka podająca"],
+["Sprzęt","Jak działa drukarka igłowa?","uderza igłami przez taśmę barwiącą w papier","nagrzewa tusz w dyszach","naświetla bęben laserem","utrwala toner grzałką"],
+["Sprzęt","Która pamięć w procesorze jest najszybsza?","cache L1","cache L3","RAM","pamięć wirtualna"],
+["Sprzęt","Do czego służy technologia S.M.A.R.T.?","monitoruje stan techniczny dysku","szyfruje dane na dysku","przyspiesza pamięć RAM","zarządza zasilaniem procesora"],
+["Sprzęt","Jakim przyrządem zmierzysz napięcia wyjściowe zasilacza?","multimetrem","testerem okablowania","reflektometrem","analizatorem widma"],
+["Sprzęt","Za co odpowiada chipset na płycie głównej?","komunikacja procesora z pozostałymi podzespołami","przechowywanie systemu operacyjnego","generowanie obrazu","chłodzenie procesora"],
+["Sprzęt","Jaki kolor ma zwykle gniazdo USB 3.0?","niebieski","czarny","czerwony","żółty"],
+["Sieci","W której warstwie modelu OSI pracuje router?","sieciowej (3)","łącza danych (2)","transportowej (4)","fizycznej (1)"],
+["Sieci","W której warstwie modelu OSI pracuje przełącznik (switch)?","łącza danych (2)","sieciowej (3)","fizycznej (1)","aplikacji (7)"],
+["Sieci","Którą maskę podsieci oznacza zapis /24?","255.255.255.0","255.255.0.0","255.255.255.128","255.0.0.0"],
+["Sieci","Który adres IPv4 jest adresem prywatnym?","192.168.1.10","172.32.0.1","11.0.0.1","8.8.8.8"],
+["Sieci","Jaki jest domyślny port protokołu HTTPS?","443","80","21","25"],
+["Sieci","Z którego portu domyślnie korzysta SSH?","22","23","53","110"],
+["Sieci","Co robi serwer DHCP?","automatycznie przydziela adresy IP","tłumaczy nazwy domen na adresy IP","filtruje ruch sieciowy","szyfruje połączenia"],
+["Sieci","Za co odpowiada usługa DNS?","zamiana nazw domenowych na adresy IP","przydzielanie adresów IP","przesyłanie poczty","zdalne logowanie"],
+["Sieci","Maksymalna długość segmentu skrętki kat. 5e to:","100 m","55 m","185 m","500 m"],
+["Sieci","Który standard Wi-Fi pracuje wyłącznie w paśmie 5 GHz?","802.11ac","802.11b","802.11g","802.11n"],
+["Sieci","Które polecenie Windows pokazuje trasę pakietów do celu?","tracert","ping","netstat","nslookup"],
+["Sieci","Ile adresów hostów można użyć w podsieci /26?","62","64","30","126"],
+["Sieci","Który protokół służy do wysyłania poczty?","SMTP","POP3","IMAP","SNMP"],
+["Sieci","Z ilu bitów składa się adres IPv6?","128","32","64","256"],
+["Sieci","Do czego służy NAT?","tłumaczy adresy prywatne na publiczne","przydziela adresy IP","szyfruje dane","wykrywa wirusy"],
+["Sieci","Do czego służą sieci VLAN?","logiczny podział sieci na przełączniku","zwiększenie zasięgu Wi-Fi","tworzenie kopii zapasowych","łączenie dwóch routerów"],
+["Sieci","Który standard opisuje zasilanie PoE?","IEEE 802.3af","IEEE 802.11n","IEEE 802.1Q","IEEE 802.5"],
+["Sieci","Jaki jest pierwszy przewód w układzie T568B?","biało-pomarańczowy","biało-zielony","niebieski","brązowy"],
+["Sieci","Z ilu bitów składa się adres MAC?","48","32","64","128"],
+["Sieci","Który adres wskazuje na automatyczną konfigurację APIPA?","169.254.12.5","127.0.0.1","192.168.0.1","10.0.0.1"],
+["Sieci","Które polecenie Windows wyświetla konfigurację IP karty sieciowej?","ipconfig","ifconfig /all","netsh ping","hostname -I"],
+["Sieci","Jaki jest domyślny port serwera FTP (sterowanie)?","21","20","69","443"],
+["Systemy","Które polecenie Linuksa zmienia uprawnienia pliku?","chmod","chown","chgrp","passwd"],
+["Systemy","Co oznaczają uprawnienia 755 w Linuksie?","rwxr-xr-x","rw-r--r--","rwxrwxrwx","r-xr-xr-x"],
+["Systemy","Które polecenie Linuksa wyświetla zawartość katalogu?","ls","cd","pwd","cat"],
+["Systemy","W którym katalogu Linuksa przechowywane są pliki konfiguracyjne?","/etc","/bin","/home","/tmp"],
+["Systemy","Które polecenie dodaje użytkownika w Linuksie?","useradd","userdel","usermod","groupdel"],
+["Systemy","Które polecenie uruchamia program z uprawnieniami administratora w Linuksie?","sudo","su -c","chroot","kill"],
+["Systemy","Jaki skrót otwiera Menedżera zadań w Windows?","Ctrl + Shift + Esc","Ctrl + Alt + F4","Win + L","Alt + Tab"],
+["Systemy","Jaki jest maksymalny rozmiar pojedynczego pliku w FAT32?","4 GB","2 GB","16 GB","bez limitu"],
+["Systemy","Które polecenie Windows sprawdza błędy na dysku?","chkdsk","sfc /scannow","defrag","diskpart"],
+["Systemy","Jakim narzędziem edytujesz rejestr Windows?","regedit","msconfig","services.msc","eventvwr"],
+["Systemy","Które polecenie wymusza odświeżenie zasad grupy w Windows?","gpupdate /force","gpresult","secpol","netsh reset"],
+["Systemy","Jaki menedżer pakietów stosuje się w Debianie i Ubuntu?","apt","yum","pacman","rpm"],
+["Systemy","Kopia różnicowa zawiera:","zmiany od ostatniej kopii pełnej","wszystkie pliki","zmiany od ostatniej dowolnej kopii","tylko nowe pliki"],
+["Systemy","Czym jest Active Directory?","usługą katalogową Microsoft","systemem plików","programem antywirusowym","serwerem WWW"],
+["Systemy","Do czego służy partycja swap w Linuksie?","jako pamięć wymiany (wirtualna)","do przechowywania systemu","jako partycja rozruchowa","do kopii zapasowych"],
+["Sprzęt","Jaka jest maksymalna przepustowość interfejsu SATA III?","6 Gb/s","1,5 Gb/s","3 Gb/s","12 Gb/s"],
+["Sprzęt","Jakie moduły obsługuje zwykle gniazdo M.2 z kluczem M?","dyski SSD NVMe","karty Wi-Fi","pamięci RAM","karty dźwiękowe"],
+["Sprzęt","Ile pinów ma moduł DIMM DDR4 do komputera stacjonarnego?","288","240","184","204"],
+["Sprzęt","Na czym polega tryb Dual Channel?","na równoległej pracy dwóch modułów RAM, co zwiększa przepustowość","na podwojeniu pojemności pamięci","na pracy pamięci w dwóch różnych napięciach","na kopiowaniu danych do drugiego modułu"],
+["Sprzęt","Co oznacza skrót TDP procesora?","moc cieplną, jaką trzeba odprowadzić z układu","maksymalną częstotliwość taktowania","liczbę rdzeni procesora","rozmiar pamięci podręcznej"],
+["Sprzęt","Jaką rozdzielczość ma standard Full HD?","1920 × 1080","1280 × 720","2560 × 1440","3840 × 2160"],
+["Sprzęt","Które złącze przesyła cyfrowo jednocześnie obraz i dźwięk?","HDMI","VGA","DVI-A","D-Sub"],
+["Sprzęt","Który element drukarki laserowej utrwala toner na papierze?","zespół grzewczy (fuser)","bęben światłoczuły","lustro skanujące","wałek ładujący"],
+["Sprzęt","Która z pamięci jest nieulotna?","Flash","DRAM","SRAM","rejestr procesora"],
+["Sprzęt","Do czego służy bateria CR2032 na płycie głównej?","podtrzymuje ustawienia BIOS i zegar czasu rzeczywistego","zasila dysk twardy","zasila wentylatory","podtrzymuje zawartość pamięci RAM"],
+["Sprzęt","Co oznacza parametr 7200 RPM dysku HDD?","prędkość obrotową talerzy na minutę","transfer danych na sekundę","pojemność pamięci cache","czas dostępu do danych"],
+["Sprzęt","Które urządzenie podtrzymuje zasilanie komputera podczas awarii prądu?","UPS","patch panel","hub","KVM"],
+["Sprzęt","Które złącze zasila dodatkowo kartę graficzną?","PCIe 6/8-pin","Molex 4-pin","złącze zasilania SATA","ATX 24-pin"],
+["Sprzęt","W jakich jednostkach podaje się taktowanie procesora?","GHz","GB","dpi","Mb/s"],
+["Sieci","Który protokół warstwy transportowej zapewnia niezawodne dostarczanie danych?","TCP","UDP","IP","ICMP"],
+["Sieci","Który protokół jest bezpołączeniowy?","UDP","TCP","FTP","SSH"],
+["Sieci","Jaki jest domyślny port usługi DNS?","53","67","110","143"],
+["Sieci","Na którym porcie nasłuchuje serwer DHCP?","UDP 67","UDP 53","TCP 80","TCP 25"],
+["Sieci","Jaki jest domyślny port protokołu IMAP?","143","110","25","587"],
+["Sieci","Na czym polega topologia gwiazdy?","wszystkie urządzenia łączą się z centralnym urządzeniem","wszystkie urządzenia korzystają z jednego kabla","urządzenia tworzą zamknięty pierścień","każde urządzenie łączy się z każdym"],
+["Sieci","Jaki jest adres rozgłoszeniowy sieci 192.168.1.0/24?","192.168.1.255","192.168.1.254","192.168.1.0","192.168.0.255"],
+["Sieci","Ile adresów hostów można przydzielić w podsieci /30?","2","4","6","1"],
+["Sieci","Który światłowód nadaje się do transmisji na duże odległości?","jednomodowy","wielomodowy","plastikowy POF","koncentryczny"],
+["Sieci","Z jakiego protokołu korzysta polecenie ping?","ICMP","TCP","UDP","ARP"],
+["Sieci","Do czego służy protokół ARP?","do ustalania adresu MAC na podstawie adresu IP","do ustalania adresu IP na podstawie nazwy","do przydzielania adresów IP","do szyfrowania ruchu"],
+["Sieci","Który standard zabezpieczenia Wi-Fi jest obecnie najnowszy i najbezpieczniejszy?","WPA3","WEP","WPA","WPA2-TKIP"],
+["Sieci","Do czego służy polecenie nslookup?","do diagnozowania usługi DNS","do badania trasy pakietów","do mierzenia przepustowości","do skanowania portów"],
+["Sieci","Które polecenie Windows wyświetla tablicę ARP?","arp -a","ipconfig /all","getmac /s","tracert -a"],
+["Sieci","Jaki jest domyślny port protokołu RDP?","3389","5900","22","445"],
+["Sieci","Który kabel łączy bezpośrednio dwa komputery bez automatycznego krosowania?","krosowany","prosty (patchcord)","koncentryczny","szeregowy"],
+["Sieci","Ile par skrętki wykorzystuje standard 1000BASE-T?","4","1","2","8"],
+["Systemy","Do czego służy polecenie grep w Linuksie?","do wyszukiwania wzorca w tekście","do kopiowania plików","do zmiany właściciela pliku","do kompresji danych"],
+["Systemy","Które polecenie Linuksa pokazuje bieżący katalog?","pwd","cd","whoami","ls -l"],
+["Systemy","Które polecenie Linuksa kończy proces o podanym PID?","kill","ps","top","nice"],
+["Systemy","Które polecenie na bieżąco pokazuje procesy i obciążenie systemu Linux?","top","df","du","mount"],
+["Systemy","Które polecenie Linuksa pokazuje wolne miejsce na partycjach?","df -h","free -m","uptime","uname -a"],
+["Systemy","W którym pliku Linuksa przechowywane są hasze haseł?","/etc/shadow","/etc/passwd","/etc/group","/etc/fstab"],
+["Systemy","Który plik określa automatyczne montowanie partycji przy starcie Linuksa?","/etc/fstab","/etc/hosts","/etc/shadow","/etc/resolv.conf"],
+["Systemy","Które polecenie Windows naprawia uszkodzone pliki systemowe?","sfc /scannow","chkdsk","diskpart","format"],
+["Systemy","Którym narzędziem zarządzasz partycjami w Windows?","diskmgmt.msc","devmgmt.msc","eventvwr.msc","services.msc"],
+["Systemy","Który system plików obsługuje uprawnienia i szyfrowanie EFS?","NTFS","FAT32","exFAT","ext4"],
+["Systemy","Jaki system plików jest domyślny w większości dystrybucji Linuksa?","ext4","NTFS","FAT32","HFS+"],
+["Systemy","Co oznacza skrót GPO w Windows Server?","obiekt zasad grupy (Group Policy Object)","globalny obiekt procesów","ogólne uprawnienia plików","opcję bramy domyślnej"],
+["Systemy","Która kopia zapasowa obejmuje zmiany od ostatniej kopii dowolnego typu?","przyrostowa","różnicowa","pełna","lustrzana"],
+["Systemy","Które polecenie Windows pokazuje aktywne połączenia i nasłuchujące porty?","netstat","tracert","nslookup","ver"],
+["Bezpieczeństwo","Na czym polega atak phishingowy?","na podszywaniu się pod zaufany podmiot w celu wyłudzenia danych","na przeciążeniu serwera ruchem","na szyfrowaniu plików ofiary","na podsłuchiwaniu sieci Wi-Fi"],
+["Bezpieczeństwo","Czym charakteryzuje się atak DDoS?","przeciążeniem usługi ruchem z wielu źródeł","wyłudzaniem haseł e-mailem","włamaniem przez lukę w przeglądarce","podmianą adresów MAC"],
+["Bezpieczeństwo","Co oznacza uwierzytelnianie dwuskładnikowe (2FA)?","potwierdzenie tożsamości dwiema niezależnymi metodami","użycie dwóch haseł tego samego typu","logowanie z dwóch urządzeń","podwójne szyfrowanie danych"],
+["Bezpieczeństwo","Który algorytm jest szyfrem symetrycznym?","AES","RSA","ECC","DSA"],
+["Bezpieczeństwo","Jak nazywa się oprogramowanie szyfrujące pliki i żądające okupu?","ransomware","spyware","adware","rootkit"],
+["Bezpieczeństwo","Co zakłada zasada kopii zapasowych 3-2-1?","3 kopie, 2 rodzaje nośników, 1 kopia poza siedzibą","3 dyski, 2 serwery, 1 chmura","3 kopie dziennie, 2 tygodniowo, 1 miesięczna","3 hasła, 2 klucze, 1 token"],
+["Bezpieczeństwo","Który z algorytmów jest funkcją skrótu?","SHA-256","AES-256","RSA","3DES"],
+["Bezpieczeństwo","Czym jest połączenie VPN?","szyfrowanym tunelem przez sieć publiczną","programem antywirusowym","rodzajem zapory sieciowej","usługą przydzielającą adresy IP"],
+["Bezpieczeństwo","Które hasło jest najsilniejsze?","Kr0t#Lampa!92xZ","qwerty123","Janek1990","12345678"]
+];
+const $=s=>document.querySelector(s),root=$('#root');
+const shuf=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+let cfg={n:10,cat:'Wszystkie'},S;
+function start(){
+ const cats=['Wszystkie','Sprzęt','Sieci','Systemy','Bezpieczeństwo'];
+ root.innerHTML=`<span class="badge">INF.02</span>
+ <h1>Trener egzaminu <span>INF.02</span></h1>
+ <p class="lead">Administracja i eksploatacja systemów komputerowych, urządzeń peryferyjnych i sieci lokalnych. Pytania losowe, odpowiedzi w losowej kolejności, natychmiastowa informacja zwrotna.</p>
+ <h3>Liczba pytań</h3><div class="row" id="n">${[10,20,40].map(n=>`<button class="chip ${cfg.n==n?'on':''}" data-v="${n}">${n} pytań</button>`).join('')}</div>
+ <h3>Zagadnienia</h3><div class="row" id="c">${cats.map(c=>`<button class="chip ${cfg.cat==c?'on':''}" data-v="${c}">${c}</button>`).join('')}</div>
+ <button class="btn" id="go">Rozpocznij test</button>
+ <p class="hint">Próg zaliczenia: 50% · W teście: klawisze 1–4 i Enter</p>`;
+ $('#n').onclick=e=>{if(e.target.dataset.v){cfg.n=+e.target.dataset.v;start()}};
+ $('#c').onclick=e=>{if(e.target.dataset.v){cfg.cat=e.target.dataset.v;start()}};
+ $('#go').onclick=begin;
+}
+function begin(){
+ const pool=Q.filter(q=>cfg.cat=='Wszystkie'||q[0]==cfg.cat);
+ const qs=shuf(pool).slice(0,cfg.n).map(q=>({cat:q[0],t:q[1],c:q[2],o:shuf(q.slice(2))}));
+ S={qs,i:0,score:0,wrong:[],done:false,t0:Date.now()};show();
+}
+function show(){
+ const q=S.qs[S.i],n=S.qs.length;S.done=false;
+ root.innerHTML=`<div class="top"><span>Pytanie ${S.i+1} z ${n}</span><span>${q.cat} · ⏱ <span id="tm"></span></span></div>
+ <div class="bar"><i style="width:${S.i/n*100}%"></i></div>
+ <div class="q">${q.t}</div>
+ ${q.o.map((o,k)=>`<button class="opt" data-k="${k}"><b>${k+1}</b><span>${o}</span></button>`).join('')}
+ <button class="btn" id="nx" disabled>${S.i==n-1?'Zakończ test':'Dalej'}</button>`;
+ root.querySelectorAll('.opt').forEach(b=>b.onclick=()=>pick(+b.dataset.k));
+ $('#nx').onclick=next;clearInterval(tmr);const u=()=>{const e=$('#tm');if(e)e.textContent=fmt((Date.now()-S.t0)/1000|0)};u();tmr=setInterval(u,1000);
+}
+function pick(k){
+ if(S.done)return;S.done=true;
+ const q=S.qs[S.i],ok=q.o[k]==q.c;
+ root.querySelectorAll('.opt').forEach((b,j)=>{b.disabled=true;if(q.o[j]==q.c)b.classList.add('ok');else if(j==k)b.classList.add('bad')});
+ if(ok)S.score++;else S.wrong.push({t:q.t,y:q.o[k],c:q.c,q});
+ $('#nx').disabled=false;$('#nx').focus();
+}
+function next(){S.i++;S.i>=S.qs.length?result():show()}
+let tmr;const fmt=s=>(s/60|0)+':'+String(s%60).padStart(2,'0');
+function rec(p){let b=p;try{b=Math.max(p,+localStorage.getItem('inf02best')||0);localStorage.setItem('inf02best',b)}catch(e){}return b}
+function retry(){S={qs:S.wrong.map(w=>({...w.q,o:shuf(w.q.o)})),i:0,score:0,wrong:[],done:false,t0:Date.now()};show()}
+function result(){clearInterval(tmr);
+ const n=S.qs.length,p=Math.round(S.score/n*100),pass=p>=50,col=pass?'var(--ok)':'var(--bad)';
+ root.innerHTML=`<div class="res"><span class="badge">WYNIK</span>
+ <div class="ring" style="background:conic-gradient(${col} ${p*3.6}deg,var(--bd) 0)"><div>${p}%</div></div>
+ <div class="verdict" style="color:${col}">${pass?'Zaliczone 🎉':'Jeszcze nie tym razem'}</div>
+ <p class="lead">Poprawne odpowiedzi: ${S.score} z ${n} · czas ${fmt((Date.now()-S.t0)/1000|0)}<br>🏆 Twój rekord: ${rec(p)}%</p></div>
+ ${S.wrong.length?`<h3>Do powtórki (${S.wrong.length})</h3>`+S.wrong.map(w=>`<div class="rev"><b>${w.t}</b><small class="w">Twoja odpowiedź: ${w.y}</small><small class="g">Poprawna: ${w.c}</small></div>`).join(''):'<p class="lead" style="text-align:center">Bezbłędnie – świetna robota!</p>'}
+ ${S.wrong.length?'<button class="btn" id="rt">Powtórz tylko błędne ('+S.wrong.length+')</button>':''}
+ <button class="btn ${S.wrong.length?'ghost':''}" id="again" ${S.wrong.length?'style="margin-top:12px"':''}>Nowy test</button>
+ <button class="btn ghost" id="menu" style="margin-top:12px">Zmień ustawienia</button>`;
+ $('#again').onclick=begin;if(S.wrong.length)$('#rt').onclick=retry;$('#menu').onclick=start;
+}
+document.addEventListener('keydown',e=>{
+ if(!S||!$('.opt'))return;
+ if(e.key>='1'&&e.key<='4'){pick(+e.key-1)}
+ else if(e.key=='Enter'&&S.done){e.preventDefault();next()}
+});
+start();
+</script>
+</body>
+</html>
